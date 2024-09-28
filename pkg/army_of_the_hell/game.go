@@ -42,6 +42,7 @@ type Game struct {
 	古代无魂之卡_countdown    int8
 	西希之王_playerid       int8
 	优先抽取议会成员_triggered  bool
+	已抽取议会成员数量_count	int8
 	衣卒尔_playerid        int8
 	衣卒尔_player_history  []bool
 	督军山克_countdown      int8
@@ -255,6 +256,7 @@ func (game *Game) PlayerLeave(playerId int) bool {
 	game.PlayerLeaved[playerId] = true
 	game.CurrentPlayerReady[playerId] = true
 	game.CurrentPlayerBid[playerId] = 0
+	game.CurrentPlayerBid2[playerId] = 0
 	if game.WaitResponsePlayerId == playerId {
 		game.Response = "否"
 		game.WaitResponsePlayerId = -1
@@ -997,9 +999,16 @@ func (game *Game) endTurn() {
 	// 邪恶之手伊斯梅尔，火焰之指吉列布，冰拳托克：优先抽取议会成员
 	if winner != -1 && (game.CurrentBiddingEntity.Name == "邪恶之手伊斯梅尔" || game.CurrentBiddingEntity.Name == "火焰之指吉列布" || game.CurrentBiddingEntity.Name == "冰拳托克") {
 		game.优先抽取议会成员_triggered = true
+		game.已抽取议会成员数量_count++
 	}
 	if winner2 != -1 && (game.CurrentBiddingEntity2.Name == "邪恶之手伊斯梅尔" || game.CurrentBiddingEntity2.Name == "火焰之指吉列布" || game.CurrentBiddingEntity2.Name == "冰拳托克") {
 		game.优先抽取议会成员_triggered = true
+		game.已抽取议会成员数量_count++
+	}
+
+	// 邪恶之手伊斯梅尔，火焰之指吉列布，冰拳托克均已被抽取，不再触发优先抽取议会成员
+	if game.已抽取议会成员数量_count == 3 && game.优先抽取议会成员_triggered {
+		game.优先抽取议会成员_triggered = false
 	}
 
 	// 衣卒尔
