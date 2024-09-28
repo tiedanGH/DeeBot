@@ -112,6 +112,35 @@ func New(number_players int) *Game {
 	return game
 }
 
+func (game *Game) Ready(playerId int) error {
+	game.ProcessingLock.Lock()
+	defer game.ProcessingLock.Unlock()
+
+	if game.CurrentPlayerReady[playerId] {
+		return errors.New("您已经准备完成")
+	}
+	game.CurrentPlayerReady[playerId] = true
+
+	fmt.Println(game.CurrentPlayerReady)
+
+	all_player_ready := true
+	for id, ready := range game.CurrentPlayerReady {
+		if game.PlayerLeaved[id] {
+			continue
+		}
+		if !ready {
+			all_player_ready = false
+		}
+	}
+	if all_player_ready {
+		for i := range game.CurrentPlayerReady {
+			game.CurrentPlayerReady[i] = false
+		}
+		game.Start()
+	}
+	return nil
+}
+
 func (game *Game) Start() {
 	game.CurrentEntityPool = []*Entity{
 		&尸体发火,
